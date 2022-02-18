@@ -1,0 +1,45 @@
+---
+title: "R Notebook"
+output: html_notebook
+---
+
+```{r}
+library(tidyverse)
+```
+
+
+```{r}
+nameslist <- list.files("data/", pattern = ".txt", full.names = T)
+```
+
+```{r}
+allnames <- tibble()
+
+for(namefile in nameslist){
+  #print(namefile)
+  temp <- read_csv(namefile, col_names = c("name", "gender", "freq")) %>%
+    mutate(year = str_sub(namefile, -8,-5)) %>%
+    group_by(gender) %>%
+    mutate(rank = rank(-freq))
+  allnames <- bind_rows(temp, allnames )
+}
+```
+
+```{r}
+allnames
+
+
+allnames %>%
+  filter(grepl('Billie', name), year > 1930) %>%
+  ggplot(aes(x=as.factor(year), y = rank, group=c(,gender), col=name, pch=gender)) +
+  geom_point()+
+  geom_line()+
+  #geom_ribbon(aes(ymin = 0,ymax = predict(loess(freq ~ year))), alpha = 0.3,fill = 'green')
+  theme(axis.text.x = element_text(angle = 90, vjust = 0.5, hjust=1)) +
+  scale_y_reverse()
+
+  
+```
+
+
+
